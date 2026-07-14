@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Anime Tracker</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Anime Tracker</h1>
+      <div id="account-area" class="account-area"></div>
+    </header>
+
+    <section id="login-section" class="login-section" hidden>
+      <p class="section-label">Log in to save anime to your AniList account.</p>
+      <button id="login-btn" class="save-btn">Log in with AniList</button>
+    </section>
+
+    <div id="app" hidden>
+      <section id="match-section" class="match-section" hidden>
+        <p class="section-label">Current tab</p>
+        <div id="match-card" class="match-card"></div>
+      </section>
+
+      <section id="match-status" class="match-status"></section>
+
+      <section class="list-section">
+        <p class="section-label">Your AniList (Watching)</p>
+        <ul id="anime-list" class="anime-list"></ul>
+        <p id="empty-state" class="empty-state" hidden>Nothing saved yet.</p>
+      </section>
+    </div>
+
+    <script src="../lib/config.js"></script>
+    <script src="../lib/title-parser.js"></script>
+    <script src="../lib/anilist.js"></script>
+    <script src="../lib/auth.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
