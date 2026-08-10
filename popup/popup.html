@@ -25,10 +25,22 @@
       <section id="match-status" class="match-status"></section>
 
       <section class="list-section">
-        <p class="section-label">Your AniList (Watching)</p>
+        <div class="list-header">
+          <p class="section-label">Your AniList (Watching)</p>
+          <span id="list-count" class="list-count"></span>
+        </div>
+        <input
+          id="filter-input"
+          class="filter-input"
+          type="search"
+          placeholder="Filter titles…"
+          autocomplete="off"
+        />
         <ul id="anime-list" class="anime-list"></ul>
         <p id="empty-state" class="empty-state" hidden>Nothing saved yet.</p>
       </section>
+
+      <div id="toast" class="toast" role="status" hidden></div>
     </div>
 
     <script src="../lib/config.js"></script>
