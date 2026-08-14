@@ -1,6 +1,7 @@
 const accountArea = document.getElementById("account-area");
 const loginSection = document.getElementById("login-section");
 const loginBtn = document.getElementById("login-btn");
+const loginError = document.getElementById("login-error");
 const appEl = document.getElementById("app");
 const matchSection = document.getElementById("match-section");
 const matchCard = document.getElementById("match-card");
@@ -458,11 +459,13 @@ loginBtn.addEventListener("click", async () => {
   loginBtn.disabled = true;
   loginBtn.textContent = "Logging in…";
   try {
-    await login();
+    await browser.runtime.sendMessage({ type: "login" });
     location.reload();
   } catch (err) {
     loginBtn.disabled = false;
     loginBtn.textContent = "Log in with AniList";
+    loginError.textContent = `Login failed: ${err.message}`;
+    loginError.hidden = false;
   }
 });
 

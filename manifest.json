@@ -5,15 +5,22 @@
   "description": "Save the anime you're watching by clicking the toolbar icon. Resolves the tab title via AniList.",
   "browser_specific_settings": {
     "gecko": {
-      "id": "anime-tracker@d3153291",
+      "id": "anime-tracker@animetracker.addon",
       "strict_min_version": "140.0",
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": ["websiteContent"]
       }
     }
   },
   "permissions": ["activeTab", "storage", "identity"],
-  "host_permissions": ["https://graphql.anilist.co/*", "https://anilist.co/*"],
+  "background": {
+    "scripts": [
+      "lib/config.js",
+      "lib/anilist.js",
+      "lib/auth.js",
+      "background/background.js"
+    ]
+  },
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": {
