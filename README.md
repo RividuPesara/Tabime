@@ -1,4 +1,4 @@
-# Anime Tracker
+# Tabime
 
 A Firefox extension that saves the anime you are watching straight to your AniList or MyAnimeList account.
 
