@@ -83,6 +83,10 @@ header {
   margin: 0 0 10px;
 }
 
+.login-section .save-btn + .save-btn {
+  margin-top: 8px;
+}
+
 h1 {
   font-size: 15px;
   margin: 0;

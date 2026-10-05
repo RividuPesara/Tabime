@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Anime Tracker",
   "version": "1.0.0",
-  "description": "Save the anime you're watching by clicking the toolbar icon. Resolves the tab title via AniList.",
+  "description": "Save the anime you're watching by clicking the toolbar icon. Resolves the tab title via AniList or MyAnimeList.",
   "browser_specific_settings": {
     "gecko": {
       "id": "anime-tracker@animetracker.addon",
@@ -13,10 +13,15 @@
     }
   },
   "permissions": ["activeTab", "storage", "identity"],
+  "host_permissions": [
+    "https://myanimelist.net/*",
+    "https://api.myanimelist.net/*"
+  ],
   "background": {
     "scripts": [
       "lib/config.js",
       "lib/anilist.js",
+      "lib/mal.js",
       "lib/auth.js",
       "background/background.js"
     ]

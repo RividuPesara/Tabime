@@ -1,6 +1,6 @@
 const accountArea = document.getElementById("account-area");
 const loginSection = document.getElementById("login-section");
-const loginBtn = document.getElementById("login-btn");
+const loginButtons = document.querySelectorAll("[data-provider]");
 const loginError = document.getElementById("login-error");
 const appEl = document.getElementById("app");
 const matchSection = document.getElementById("match-section");
@@ -11,6 +11,7 @@ const emptyState = document.getElementById("empty-state");
 const filterInput = document.getElementById("filter-input");
 const listCount = document.getElementById("list-count");
 const toastEl = document.getElementById("toast");
+const listLabel = document.getElementById("list-label");
 
 const STATUS_LABELS = {
   CURRENT: "Watching",
@@ -110,7 +111,7 @@ function setList(list) {
 async function applyChange(item, changes, message) {
   const scrollTop = listEl.scrollTop;
   try {
-    const updated = await updateEntry(currentSession, item.entryId, changes);
+    const updated = await providerFor(currentSession).updateEntry(currentSession, item.entryId, changes);
     setList(updated);
     listEl.scrollTop = scrollTop;
     if (message) showToast(message);
@@ -218,7 +219,7 @@ function buildDetail(item) {
     anilistLink.href = item.siteUrl;
     anilistLink.target = "_blank";
     anilistLink.rel = "noreferrer";
-    anilistLink.textContent = "View on AniList";
+    anilistLink.textContent = `View on ${providerFor(currentSession).name}`;
     detail.appendChild(anilistLink);
   }
 
@@ -314,7 +315,7 @@ function buildRow(item) {
   removeBtn.addEventListener("click", async () => {
     const scrollTop = listEl.scrollTop;
     try {
-      const updated = await removeAnime(currentSession, item.entryId);
+      const updated = await providerFor(currentSession).removeAnime(currentSession, item.entryId);
       setList(updated);
       listEl.scrollTop = scrollTop;
     } catch (err) {
@@ -365,7 +366,7 @@ function renderMatchCard(session, media, episode) {
   matchCard.innerHTML = "";
 
   const img = document.createElement("img");
-  img.src = media.coverImage.medium;
+  img.src = media.cover;
   img.alt = "";
 
   const info = document.createElement("div");
@@ -373,7 +374,7 @@ function renderMatchCard(session, media, episode) {
 
   const title = document.createElement("div");
   title.className = "match-title";
-  title.textContent = media.title.english || media.title.romaji;
+  title.textContent = media.title;
 
   const episodeLine = document.createElement("div");
   episodeLine.className = "match-episode";
@@ -388,7 +389,7 @@ function renderMatchCard(session, media, episode) {
   saveBtn.addEventListener("click", async () => {
     saveBtn.disabled = true;
     saveBtn.textContent = "Saved";
-    const updated = await saveAnime(session, media, episode);
+    const updated = await providerFor(session).saveAnime(session, media, episode);
     setList(updated);
   });
 
@@ -401,7 +402,7 @@ async function ensureScoreFormat(session) {
   if (session.viewer.mediaListOptions) return session;
 
   try {
-    const viewer = await getViewer(session.token);
+    const viewer = await providerFor(session).getViewer(session.token);
     if (viewer) {
       session.viewer = viewer;
       await saveSession(session);
@@ -412,8 +413,10 @@ async function ensureScoreFormat(session) {
 }
 
 async function loadForSession(session) {
+  const provider = providerFor(session);
   renderAccountArea(session);
-  setList(await getList(session));
+  listLabel.textContent = `Your ${provider.name} (Watching)`;
+  setList(await provider.getList(session));
 
   const [tab] = await browser.tabs.query({
     active: true,
@@ -425,20 +428,20 @@ async function loadForSession(session) {
   const { query, episode } = parseTabTitle(tab.title);
   if (!query) return;
 
-  matchStatus.textContent = "Looking up on AniList…";
+  matchStatus.textContent = `Looking up on ${provider.name}…`;
 
   try {
-    const media = await searchAnime(query);
+    const media = await provider.searchAnime(query, session);
     matchStatus.textContent = "";
 
     if (!media) {
-      matchStatus.textContent = "No AniList match for this tab.";
+      matchStatus.textContent = `No ${provider.name} match for this tab.`;
       return;
     }
 
     renderMatchCard(session, media, episode);
   } catch (err) {
-    matchStatus.textContent = "AniList lookup failed.";
+    matchStatus.textContent = `${provider.name} lookup failed.`;
   }
 }
 
@@ -455,19 +458,25 @@ filterInput.addEventListener("keydown", (e) => {
   }
 });
 
-loginBtn.addEventListener("click", async () => {
-  loginBtn.disabled = true;
-  loginBtn.textContent = "Logging in…";
-  try {
-    await browser.runtime.sendMessage({ type: "login" });
-    location.reload();
-  } catch (err) {
-    loginBtn.disabled = false;
-    loginBtn.textContent = "Log in with AniList";
-    loginError.textContent = `Login failed: ${err.message}`;
-    loginError.hidden = false;
-  }
-});
+for (const loginBtn of loginButtons) {
+  loginBtn.addEventListener("click", async () => {
+    const label = loginBtn.textContent;
+    for (const btn of loginButtons) btn.disabled = true;
+    loginBtn.textContent = "Logging in…";
+    try {
+      await browser.runtime.sendMessage({
+        type: "login",
+        provider: loginBtn.dataset.provider,
+      });
+      location.reload();
+    } catch (err) {
+      for (const btn of loginButtons) btn.disabled = false;
+      loginBtn.textContent = label;
+      loginError.textContent = `Login failed: ${err.message}`;
+      loginError.hidden = false;
+    }
+  });
+}
 
 async function init() {
   const session = await getSession();
